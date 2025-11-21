@@ -75,6 +75,13 @@ resource "aws_route_table" "public" {
   )
 }
 
+# always add route seperately
+resource "aws_route" "public" {
+  route_table_id            = aws_route_table.public.id
+  destination_cidr_block    = "0.0.0.0/0"
+  gateway_id = aws_internet_gateway.main.id
+}
+
 resource "aws_eip" "eip" {
   domain = "vpc"
 }
@@ -96,10 +103,6 @@ resource "aws_nat_gateway" "main" {
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
   
-  route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main.id
-  }
   tags = merge(
     var.common_tags,
     {
@@ -109,13 +112,16 @@ resource "aws_route_table" "private" {
   )
 }
 
+resource "aws_route" "private" {
+  route_table_id            = aws_route_table.private.id
+  destination_cidr_block    = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.main.id
+}
+
+
 resource "aws_route_table" "database" {
   vpc_id = aws_vpc.main.id
   
-  route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main.id
-  }
   tags = merge(
     var.common_tags,
     {
@@ -124,6 +130,13 @@ resource "aws_route_table" "database" {
     var.database_route_table_tags
   )
 }
+
+resource "aws_route" "database" {
+  route_table_id            = aws_route_table.database.id
+  destination_cidr_block    = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.main.id
+}
+
 
 resource "aws_route_table_association" "public" {
     count = length(var.public_subnet_cidr)
