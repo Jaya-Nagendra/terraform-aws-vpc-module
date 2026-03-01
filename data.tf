@@ -1,0 +1,12 @@
+data "aws_availability_zones" "available" {
+  state = "available"
+
+#   filter {
+#     name   = "opt-in-status"
+#     values = ["not-opted-in", "opted-in"]
+#   }
+}
+
+output "azs-info" {
+  value = data.aws_availability_zones.available
+}
