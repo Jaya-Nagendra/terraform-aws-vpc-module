@@ -16,8 +16,13 @@ resource "aws_subnet" "public" {
   count = length(var.public_subnet_ciders)
   vpc_id     = aws_vpc.main.id
   cidr_block = var.public_subnet_ciders[count.index]
-  availability_zone   = data.aws_availability_zones.available.names[0]
-  tags = {
-    Name = "Main"
-  }
+  availability_zone   = local.az_names[count.index]
+  map_public_ip_on_launch = true
+  
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.project}-${var.environment}-public-${local.az_names[count.index]}"
+    }
+  )
 }
